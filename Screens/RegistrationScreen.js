@@ -24,6 +24,10 @@ export default function RegistrationScreen() {
   const [inputOnFocus, setInputOnFocus] = useState(false);
   const [showPassword, setShowPassword] = useState(true);
   const [selectedImage, setSelectedImage] = useState(true);
+  const [login, setLogin] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const { width, height } = useWindowDimensions();
 
   const handleShowPassword = () => {
@@ -32,6 +36,13 @@ export default function RegistrationScreen() {
 
   const handleAddUserPhoto = () => {
     setSelectedImage(!selectedImage);
+  };
+
+  const handleSubmit = () => {
+    setLogin(login);
+    setEmail(email);
+    setPassword(password);
+    console.log("login:", login, "email:", email, "password:", password);
   };
 
   //   const pickImageAsync = async () => {
@@ -52,12 +63,12 @@ export default function RegistrationScreen() {
       source={BgImage}
       style={{ position: "absolute", top: 0, width: width, height: height }}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? -175 : -175}
-        style={styles.container}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? -175 : -175}
+          style={styles.container}
+        >
           <View style={styles.box}>
             <View style={styles.imgContainer}>
               {selectedImage ? (
@@ -84,6 +95,8 @@ export default function RegistrationScreen() {
                   inputOnFocus === "login" && styles.inputFocus,
                 ]}
                 onFocus={() => setInputOnFocus("login")}
+                value={login}
+                onChangeText={setLogin}
                 placeholder="Логін"
                 placeholderTextColor="#bdbdbd"
               />
@@ -93,6 +106,8 @@ export default function RegistrationScreen() {
                   inputOnFocus === "email" && styles.inputFocus,
                 ]}
                 onFocus={() => setInputOnFocus("email")}
+                value={email}
+                onChangeText={setEmail}
                 placeholder="Адреса електронної пошти"
                 placeholderTextColor="#bdbdbd"
               />
@@ -102,6 +117,8 @@ export default function RegistrationScreen() {
                   inputOnFocus === "password" && styles.inputFocus,
                 ]}
                 onFocus={() => setInputOnFocus("password")}
+                value={password}
+                onChangeText={setPassword}
                 placeholder="Пароль"
                 placeholderTextColor="#bdbdbd"
                 secureTextEntry={showPassword}
@@ -115,17 +132,14 @@ export default function RegistrationScreen() {
                 </Text>
               </Pressable>
             </View>
-            <Pressable
-              style={styles.button}
-              // onPress={onPress}
-            >
+            <Pressable style={styles.button} onPress={handleSubmit}>
               <Text style={styles.buttonTitle}>Зареєстуватися</Text>
             </Pressable>
             <Text style={styles.text}>Вже є акаунт? Увійти</Text>
             <View style={styles.indicator}></View>
           </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </ImageBackground>
   );
 }

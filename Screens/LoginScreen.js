@@ -17,10 +17,19 @@ import BgImage from "../assets/bg-img.jpg";
 export default function LoginScreen() {
   const [inputOnFocus, setInputOnFocus] = useState(false);
   const [showPassword, setShowPassword] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const { width, height } = useWindowDimensions();
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleSubmit = () => {
+    setEmail(email);
+    setPassword(password);
+    console.log("email:", email, "password:", password);
   };
 
   return (
@@ -28,12 +37,12 @@ export default function LoginScreen() {
       source={BgImage}
       style={{ position: "absolute", top: 0, width: width, height: height }}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? -255 : -255}
-        style={styles.container}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? -255 : -255}
+          style={styles.container}
+        >
           <View style={styles.box}>
             <Text style={styles.title}>Увійти</Text>
             <View style={styles.thumb}>
@@ -43,6 +52,8 @@ export default function LoginScreen() {
                   inputOnFocus === "email" && styles.inputFocus,
                 ]}
                 onFocus={() => setInputOnFocus("email")}
+                value={email}
+                onChangeText={setEmail}
                 placeholder="Адреса електронної пошти"
                 placeholderTextColor="#bdbdbd"
               />
@@ -52,6 +63,8 @@ export default function LoginScreen() {
                   inputOnFocus === "password" && styles.inputFocus,
                 ]}
                 onFocus={() => setInputOnFocus("password")}
+                value={password}
+                onChangeText={setPassword}
                 placeholder="Пароль"
                 placeholderTextColor="#bdbdbd"
                 secureTextEntry={showPassword}
@@ -66,17 +79,14 @@ export default function LoginScreen() {
               </Pressable>
             </View>
 
-            <Pressable
-              style={styles.button}
-              // onPress={onPress}
-            >
+            <Pressable style={styles.button} onPress={handleSubmit}>
               <Text style={styles.buttonTitle}>Увійти</Text>
             </Pressable>
             <Text style={styles.text}>Немає акаунту? Зареєструватися</Text>
             <View style={styles.indicator}></View>
           </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </ImageBackground>
   );
 }
