@@ -15,12 +15,12 @@ import {
   Keyboard,
 } from "react-native";
 import BgImage from "../assets/bg-img.jpg";
-import AddPhotoIcon from "../assets/add-photo.svg";
-import RemoveIcon from "../assets/remove-icon.svg";
+import AddPhotoIcon from "../assets/icons/add-photo.svg";
+import RemoveIcon from "../assets/icons/remove-icon.svg";
 import ImageViewer from "../components/ImageViewer/ImageViewer";
 import UserImage from "../assets/images/user-img.jpg";
 
-export default function RegistrationScreen() {
+export default function RegistrationScreen({ navigation }) {
   const [inputOnFocus, setInputOnFocus] = useState(false);
   const [showPassword, setShowPassword] = useState(true);
   const [selectedImage, setSelectedImage] = useState(true);
@@ -42,7 +42,16 @@ export default function RegistrationScreen() {
     setLogin(login);
     setEmail(email);
     setPassword(password);
-    console.log("login:", login, "email:", email, "password:", password);
+    console.log(
+      "RegScr",
+      "login:",
+      login,
+      "email:",
+      email,
+      "password:",
+      password
+    );
+    navigation.navigate("Home", { login, email });
   };
 
   //   const pickImageAsync = async () => {
@@ -132,11 +141,15 @@ export default function RegistrationScreen() {
                 </Text>
               </Pressable>
             </View>
-            <Pressable style={styles.button} onPress={handleSubmit}>
+            <Pressable style={styles.button} onPress={handleSubmit} onSubmit>
               <Text style={styles.buttonTitle}>Зареєстуватися</Text>
             </Pressable>
-            <Text style={styles.text}>Вже є акаунт? Увійти</Text>
-            <View style={styles.indicator}></View>
+            <Text
+              style={styles.text}
+              onPress={() => navigation.navigate("Login")}
+            >
+              Вже є акаунт? Увійти
+            </Text>
           </View>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
@@ -229,13 +242,5 @@ const styles = StyleSheet.create({
   passwordButtonText: {
     color: "#1b4371",
     fontSize: 16,
-  },
-  indicator: {
-    position: "absolute",
-    bottom: -21,
-    width: 135,
-    height: 5,
-    backgroundColor: "#212121",
-    borderRadius: 5,
   },
 });

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 
 import {
   View,
@@ -14,7 +15,7 @@ import {
 } from "react-native";
 import BgImage from "../assets/bg-img.jpg";
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }) {
   const [inputOnFocus, setInputOnFocus] = useState(false);
   const [showPassword, setShowPassword] = useState(true);
   const [email, setEmail] = useState("");
@@ -29,7 +30,8 @@ export default function LoginScreen() {
   const handleSubmit = () => {
     setEmail(email);
     setPassword(password);
-    console.log("email:", email, "password:", password);
+    console.log("LogScr", "email:", email, "password:", password);
+    navigation.navigate("Home");
   };
 
   return (
@@ -82,8 +84,12 @@ export default function LoginScreen() {
             <Pressable style={styles.button} onPress={handleSubmit}>
               <Text style={styles.buttonTitle}>Увійти</Text>
             </Pressable>
-            <Text style={styles.text}>Немає акаунту? Зареєструватися</Text>
-            <View style={styles.indicator}></View>
+            <Text
+              style={styles.text}
+              onPress={() => navigation.navigate("Registration")}
+            >
+              Немає акаунту? Зареєструватися
+            </Text>
           </View>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
@@ -166,13 +172,5 @@ const styles = StyleSheet.create({
   passwordButtonText: {
     color: "#1b4371",
     fontSize: 16,
-  },
-  indicator: {
-    position: "absolute",
-    bottom: -21,
-    width: 135,
-    height: 5,
-    backgroundColor: "#212121",
-    borderRadius: 5,
   },
 });
