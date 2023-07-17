@@ -10,7 +10,7 @@ import { Feather } from "@expo/vector-icons";
 import { FlatList } from "react-native-gesture-handler";
 
 import BgImage from "../assets/bg-img.jpg";
-import UserImage from "../assets/images/user-img.jpg";
+
 import RemoveIcon from "../assets/icons/remove-icon.svg";
 import PublicationItem from "../components/ImageViewer/PublicationItem";
 

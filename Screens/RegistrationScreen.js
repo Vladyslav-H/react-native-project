@@ -18,12 +18,11 @@ import BgImage from "../assets/bg-img.jpg";
 import AddPhotoIcon from "../assets/icons/add-photo.svg";
 import RemoveIcon from "../assets/icons/remove-icon.svg";
 import ImageViewer from "../components/ImageViewer/ImageViewer";
-import UserImage from "../assets/images/user-img.jpg";
 
 export default function RegistrationScreen({ navigation }) {
   const [inputOnFocus, setInputOnFocus] = useState(false);
   const [showPassword, setShowPassword] = useState(true);
-  const [selectedImage, setSelectedImage] = useState(true);
+  const [selectedPhoto, setselectedPhoto] = useState(null);
   const [login, setLogin] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,8 +33,8 @@ export default function RegistrationScreen({ navigation }) {
     setShowPassword(!showPassword);
   };
 
-  const handleAddUserPhoto = () => {
-    setSelectedImage(!selectedImage);
+  const removePhoto = () => {
+    setselectedPhoto(null);
   };
 
   const handleSubmit = () => {
@@ -51,21 +50,21 @@ export default function RegistrationScreen({ navigation }) {
       "password:",
       password
     );
-    navigation.navigate("Home", { login, email });
+    navigation.navigate("Home", { login, email, userPhotoUrl: selectedPhoto });
   };
 
-  //   const pickImageAsync = async () => {
-  //     let result = await ImagePicker.launchImageLibraryAsync({
-  //       allowsEditing: true,
-  //       quality: 1,
-  //     });
+  const handleAddUserPhoto = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
 
-  //     if (!result.canceled) {
-  //      setSelectedImage(result.assets[0].uri);
-  //     } else {
-  //       alert("You did not select any image.");
-  //     }
-  //   };
+    if (!result.canceled) {
+      setselectedPhoto(result.assets[0].uri);
+    } else {
+      alert("You did not select any image.");
+    }
+  };
 
   return (
     <ImageBackground
@@ -80,17 +79,19 @@ export default function RegistrationScreen({ navigation }) {
         >
           <View style={styles.box}>
             <View style={styles.imgContainer}>
-              {selectedImage ? (
+              {!selectedPhoto ? (
                 <Pressable onPress={handleAddUserPhoto}>
                   <AddPhotoIcon width={132} height={120} />
                 </Pressable>
               ) : (
                 <View>
-                  <Image style={{ borderRadius: 16 }} source={UserImage} />
-                  <Pressable
-                    style={styles.closeBtn}
-                    onPress={handleAddUserPhoto}
-                  >
+                  <Image
+                    style={{ borderRadius: 16, width: 120, height: 120 }}
+                    source={{
+                      uri: selectedPhoto
+                    }}
+                  />
+                  <Pressable style={styles.closeBtn} onPress={removePhoto}>
                     <RemoveIcon width={35} height={35} />
                   </Pressable>
                 </View>

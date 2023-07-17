@@ -12,16 +12,30 @@ import {
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
+import * as Location from "expo-location";
+import { useNavigation } from "@react-navigation/native";
+import * as ImagePicker from "expo-image-picker";
 
 export default function CreatePostsScreen() {
   const [hasPermission, setHasPermission] = useState(null);
   const [cameraRef, setCameraRef] = useState(null);
   const [takenPhoto, setTakenPhoto] = useState(null);
-  const [namePost,setNamePost]=useState('')
-  // const [type, setType] = useState(Camera.Constants.Type.back);
-  const createPost = () => {
-    setTakenPhoto(null);
-  };
+  const [namePost, setNamePost] = useState(null);
+  const [locationName, setLocationName] = useState(null);
+  const [coordinate, setCoordinate] = useState(null);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [inputOnFocus, setInputOnFocus] = useState(false);
+
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -39,70 +53,157 @@ export default function CreatePostsScreen() {
     return <Text>No access to camera</Text>;
   }
 
+  const handleSelectImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    let location = await Location.getCurrentPositionAsync({});
+    const coords = {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    };
+    setCoordinate(coords);
+
+    if (!result.canceled) {
+      setSelectedPhoto(result.assets[0].uri);
+    } else {
+      alert("You did not select any image.");
+    }
+  };
+
+  const createPost = async () => {
+    let location = await Location.getCurrentPositionAsync({});
+    const coords = {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    };
+    setCoordinate(coords);
+    setLocationName(null);
+    setSelectedPhoto(null);
+    setNamePost(null);
+    if (coordinate)
+      navigation.navigate("Публікації", {
+        selectedPhoto,
+        namePost,
+        locationName,
+        coordinate,
+      });
+    // console.log("COOR", coordinate);
+    // console.log("COORlocation", location);
+  };
+
+  const removePost = () => {
+    setLocationName(null);
+    setSelectedPhoto(null);
+    setNamePost(null);
+  };
+
+  const isActiveButton = selectedPhoto && namePost && locationName;
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      {/* <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? -175 : 175}
-      style={styles.contaner}
-      > */}
       <View style={styles.contaner}>
-        <View style={styles.cameraContaner}>
-          {takenPhoto ? (
-            <Image
-              source={{
-                uri: takenPhoto
+        <KeyboardAvoidingView
+          behavior="position"
+          keyboardVerticalOffset={Platform.OS === "ios" ? 150 : 70}
+        >
+          <View style={styles.cameraContaner}>
+            {selectedPhoto ? (
+              <Image
+                source={{
+                  uri: selectedPhoto,
+                }}
+                style={{ width: "100%", height: 240 }}
+              />
+            ) : (
+              <Camera style={styles.camera} ref={setCameraRef}></Camera>
+            )}
+            <Pressable
+              style={styles.cameraIconContaner}
+              onPress={async () => {
+                if (cameraRef) {
+                  const { uri } = await cameraRef.takePictureAsync();
+                  await MediaLibrary.createAssetAsync(uri);
+                  setTakenPhoto(uri);
+                }
               }}
-              style={{width:'100%',height:240}}
-            />
-          ) : (
-            <Camera style={styles.camera} ref={setCameraRef}></Camera>
-          )}
-          <Pressable
-            style={styles.cameraIconContaner}
-            onPress={async () => {
-              if (cameraRef) {
-                const { uri } = await cameraRef.takePictureAsync();
-                await MediaLibrary.createAssetAsync(uri);
-                setTakenPhoto(uri);
-                              }
-            }}
-          >
-            <View>
-              <MaterialIcons name="camera-alt" size={24} color="#ffffff" />
-            </View>
+            >
+              <View>
+                <MaterialIcons name="camera-alt" size={24} color="#ffffff" />
+              </View>
+            </Pressable>
+          </View>
+          <Pressable onPress={handleSelectImage}>
+            {selectedPhoto ? (
+              <Text style={styles.cameraText}>Редагувати фото</Text>
+            ) : (
+              <Text style={styles.cameraText}>Завантажте фото</Text>
+            )}
           </Pressable>
-        </View>
-        <Text style={styles.cameraText}>Завантажте фото</Text>
-       
-        <View style={styles.inputContaner}>
-          <TextInput
-            style={{ ...styles.input, marginBottom: 16 }}
-            value={namePost}
-            onChangeText={setNamePost}
-            placeholder="Назва..."
-            placeholderTextColor="#bdbdbd"
-          />
-          <TextInput
-            style={{ ...styles.input, paddingLeft: 28 }}
-            placeholder="Місцевість..."
-            placeholderTextColor="#bdbdbd"
-          />
+
+          <View style={styles.inputContaner}>
+            <TextInput
+              style={[
+                inputOnFocus === "namePost"
+                  ? { ...styles.inputFocus, marginBottom: 16 }
+                  : { ...styles.input, marginBottom: 16 },
+              ]}
+              onFocus={() => setInputOnFocus("namePost")}
+              value={namePost}
+              onChangeText={setNamePost}
+              placeholder="Назва..."
+              placeholderTextColor="#bdbdbd"
+            />
+            <TextInput
+              style={[
+                inputOnFocus === "locationName"
+                  ? { ...styles.inputFocus, paddingLeft: 28 }
+                  : { ...styles.input, paddingLeft: 28 },
+              ]}
+              onFocus={() => setInputOnFocus("locationName")}
+              value={locationName}
+              onChangeText={setLocationName}
+              placeholder="Місцевість..."
+              placeholderTextColor="#bdbdbd"
+            />
+            <Feather
+              style={styles.icon}
+              name="map-pin"
+              size={24}
+              color="#bdbdbd"
+            />
+          </View>
+        </KeyboardAvoidingView>
+        <Pressable
+          style={[
+            styles.button,
+            isActiveButton ? styles.buttonActive : styles.buttonDisable,
+          ]}
+          onPress={() => {
+            createPost();
+          }}
+          disabled={!isActiveButton}
+        >
+          <Text
+            style={[
+              styles.buttonTitle,
+              isActiveButton ? styles.buttonActive : styles.buttonDisable,
+            ]}
+          >
+            Опубліковати
+          </Text>
+        </Pressable>
+        <Pressable style={styles.buttonRemove} onPress={removePost}>
           <Feather
-            style={styles.icon}
-            name="map-pin"
+            name="trash-2"
             size={24}
             color="#bdbdbd"
+            style={styles.buttonTitle}
           />
-        </View>
-        <Pressable style={styles.button} onPress={createPost}>
-          <Text style={styles.buttonTitle}>Опубліковати</Text>
-        </Pressable>
-        <Pressable style={styles.buttonRemove}>
-          <Feather name="trash-2" size={24} style={styles.buttonTitle} />
         </Pressable>
       </View>
-      {/* </KeyboardAvoidingView> */}
     </TouchableWithoutFeedback>
   );
 }
@@ -113,6 +214,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     paddingVertical: 32,
     paddingHorizontal: 16,
+    justifyContent: "space-between",
+  },
+  subContainer: {
+    flex: 1,
     justifyContent: "space-between",
   },
   cameraContaner: {
@@ -152,6 +257,11 @@ const styles = StyleSheet.create({
     borderBottomColor: "#e8e8e8",
     borderBottomWidth: 1,
   },
+  inputFocus: {
+    height: 50,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ff6c00",
+  },
   icon: {
     position: "absolute",
     bottom: 13,
@@ -162,11 +272,17 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     marginBottom: 120,
     borderRadius: 100,
+  },
+  buttonDisable: {
     backgroundColor: "#f6f6f6",
+    color: "#bdbdbd",
+  },
+  buttonActive: {
+    backgroundColor: "#ff6c00",
+    color: "#ffffff",
   },
   buttonTitle: {
     textAlign: "center",
-    color: "#bdbdbd",
   },
   buttonRemove: {
     width: 70,

@@ -2,9 +2,11 @@ import { View, Text, Pressable } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 
-import PostsScreen from "./PopstsScreen";
+import PostsScreen from "./PostsScreen";
 import CreatePostsScreen from "./CreatePostsScreen";
 import ProfileScreen from "./ProfileScreen";
+import CommentsScreen from "./CommentsScreen";
+import MapScreen from "./MapScreen";
 import NewIcon from "../assets/icons/new-icon.svg";
 import LogOutIcon from "../assets/icons/log-out-icon.svg";
 import { useRoute } from "@react-navigation/native";
@@ -12,8 +14,8 @@ import { useRoute } from "@react-navigation/native";
 const Tabs = createBottomTabNavigator();
 
 export default function Home({ navigation }) {
-  //   const {parsms:{login,email}}=useRoute()
-  // console.log(login);
+  const { params } = useRoute();
+
   return (
     <Tabs.Navigator
       initialRouteName="Публікації"
@@ -39,6 +41,7 @@ export default function Home({ navigation }) {
       <Tabs.Screen
         name="Публікації"
         component={PostsScreen}
+        initialParams={params}
         options={{
           headerTitleStyle: {
             fontFamily: "Roboto-Medium",
@@ -80,6 +83,44 @@ export default function Home({ navigation }) {
           headerShown: false,
           tabBarShowLabel: false,
           tabBarIcon: ({}) => <Feather name="user" size={24} color="#212121" />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="Коментарі"
+        component={CommentsScreen}
+        options={{
+          tabBarStyle: { display: "none" },
+          tabBarItemStyle: {
+            display: "none",
+          },
+          headerLeft: () => (
+            <Pressable
+              style={{ marginLeft: 16 }}
+              onPress={() => navigation.navigate("Публікації")}
+            >
+              <Feather name="arrow-left" size={24} color="#212121" />
+            </Pressable>
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="Мапа"
+        component={MapScreen}
+        options={{
+          tabBarStyle: { display: "none" },
+          tabBarItemStyle: {
+            display: "none",
+          },
+          headerLeft: () => (
+            <Pressable
+              style={{ marginLeft: 16 }}
+              onPress={() => navigation.navigate("Публікації")}
+            >
+              <Feather name="arrow-left" size={24} color="#212121" />
+            </Pressable>
+          ),
         }}
       />
     </Tabs.Navigator>

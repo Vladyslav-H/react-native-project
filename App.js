@@ -8,7 +8,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import RegistrationScreen from "./Screens/RegistrationScreen";
 import LoginScreen from "./Screens/LoginScreen";
 import Home from './Screens/Home'
-import PostsScreen from "./Screens/PopstsScreen";
+import PostsScreen from "./Screens/PostsScreen";
 
 const MainStack = createStackNavigator();
 
@@ -22,7 +22,7 @@ export default function App() {
   }
 
   return (
-    // <View style={styles.container}>
+  
     <NavigationContainer>
       <MainStack.Navigator initialRouteName="Login">
         <MainStack.Screen
@@ -39,16 +39,14 @@ export default function App() {
         <MainStack.Screen
             name="Home"
             component={Home}
-            options={{ headerShown: false, headerStyle: {
-              backgroundColor: "#f4511e",
-            }, }}
+            options={{ headerShown: false }}
         />
        
       </MainStack.Navigator>
 
       <StatusBar style="auto" />
     </NavigationContainer>
-    // </View>
+   
   );
 }
 
