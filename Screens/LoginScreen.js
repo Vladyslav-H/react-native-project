@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
 
 import {
   View,
@@ -15,22 +15,36 @@ import {
 } from "react-native";
 import BgImage from "../assets/bg-img.jpg";
 
+import { loginUser } from "../redux/auth/authOperations";
+
 export default function LoginScreen({ navigation }) {
   const [inputOnFocus, setInputOnFocus] = useState(false);
   const [showPassword, setShowPassword] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(null);
+  const [password, setPassword] = useState(null);
 
   const { width, height } = useWindowDimensions();
+
+  const dispatch = useDispatch();
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
+  const checking = (obj) => {
+    console.log(Object.keys(obj));
+    console.log(Object.values(obj));
+    console.log(Object.entries(obj));
+    // alert(`${obj}`)
+  }
+
   const handleSubmit = () => {
-    setEmail(email);
-    setPassword(password);
-    console.log("LogScr", "email:", email, "password:", password);
+    // console.log("LogScr", "email:", email, "password:", password);
+    // console.log("email", email);
+    checking({ email, password })
+    dispatch(loginUser({ email, password }));
+    setEmail(null);
+    setPassword(null);
     navigation.navigate("Home");
   };
 
@@ -55,7 +69,7 @@ export default function LoginScreen({ navigation }) {
                 ]}
                 onFocus={() => setInputOnFocus("email")}
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => setEmail(text)}
                 placeholder="Адреса електронної пошти"
                 placeholderTextColor="#bdbdbd"
               />
@@ -66,7 +80,7 @@ export default function LoginScreen({ navigation }) {
                 ]}
                 onFocus={() => setInputOnFocus("password")}
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => setPassword(text)}
                 placeholder="Пароль"
                 placeholderTextColor="#bdbdbd"
                 secureTextEntry={showPassword}

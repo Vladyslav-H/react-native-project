@@ -1,8 +1,7 @@
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-
+import { useDispatch } from "react-redux";
 import {
-  Image,
   View,
   StyleSheet,
   ImageBackground,
@@ -14,43 +13,39 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+
 import BgImage from "../assets/bg-img.jpg";
-import AddPhotoIcon from "../assets/icons/add-photo.svg";
-import RemoveIcon from "../assets/icons/remove-icon.svg";
-import ImageViewer from "../components/ImageViewer/ImageViewer";
+import { registerUser } from "../redux/auth/authOperations";
+import { ImageViewer } from "../components/ImageViewer/ImageViewer";
 
 export default function RegistrationScreen({ navigation }) {
   const [inputOnFocus, setInputOnFocus] = useState(false);
   const [showPassword, setShowPassword] = useState(true);
-  const [selectedPhoto, setselectedPhoto] = useState(null);
-  const [login, setLogin] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [photoURL, setphotoURL] = useState(null);
+  const [login, setLogin] = useState(null);
+  const [email, setEmail] = useState(null);
+  const [password, setPassword] = useState(null);
 
   const { width, height } = useWindowDimensions();
+
+  const dispatch = useDispatch();
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
-  const removePhoto = () => {
-    setselectedPhoto(null);
-  };
-
   const handleSubmit = () => {
-    setLogin(login);
-    setEmail(email);
-    setPassword(password);
-    console.log(
-      "RegScr",
-      "login:",
-      login,
-      "email:",
-      email,
-      "password:",
-      password
-    );
-    navigation.navigate("Home", { login, email, userPhotoUrl: selectedPhoto });
+    if (!login) alert("Введіть логін");
+    if (!email) alert("Введіть адресу електронної пошти");
+    if (!password) alert("Введіть пароль");
+
+    dispatch(registerUser({ login, email, password, photoURL }));
+
+    setLogin(null);
+    setEmail(null);
+    setPassword(null);
+    setphotoURL(null);
+    navigation.navigate("Home");
   };
 
   const handleAddUserPhoto = async () => {
@@ -60,10 +55,14 @@ export default function RegistrationScreen({ navigation }) {
     });
 
     if (!result.canceled) {
-      setselectedPhoto(result.assets[0].uri);
+      setphotoURL(result.assets[0].uri);
     } else {
-      alert("You did not select any image.");
+      alert("Ви не вибрали жодного зображення");
     }
+  };
+
+  const removePhoto = () => {
+    setphotoURL(null);
   };
 
   return (
@@ -78,25 +77,11 @@ export default function RegistrationScreen({ navigation }) {
           style={styles.container}
         >
           <View style={styles.box}>
-            <View style={styles.imgContainer}>
-              {!selectedPhoto ? (
-                <Pressable onPress={handleAddUserPhoto}>
-                  <AddPhotoIcon width={132} height={120} />
-                </Pressable>
-              ) : (
-                <View>
-                  <Image
-                    style={{ borderRadius: 16, width: 120, height: 120 }}
-                    source={{
-                      uri: selectedPhoto
-                    }}
-                  />
-                  <Pressable style={styles.closeBtn} onPress={removePhoto}>
-                    <RemoveIcon width={35} height={35} />
-                  </Pressable>
-                </View>
-              )}
-            </View>
+            <ImageViewer
+              userPhoto={photoURL}
+              addUserPhoto={handleAddUserPhoto}
+              removeUserPhoto={removePhoto}
+            />
             <Text style={styles.title}>Реєстрація</Text>
             <View style={styles.thumb}>
               <TextInput
@@ -106,7 +91,7 @@ export default function RegistrationScreen({ navigation }) {
                 ]}
                 onFocus={() => setInputOnFocus("login")}
                 value={login}
-                onChangeText={setLogin}
+                onChangeText={(text) => setLogin(text)}
                 placeholder="Логін"
                 placeholderTextColor="#bdbdbd"
               />
@@ -117,7 +102,7 @@ export default function RegistrationScreen({ navigation }) {
                 ]}
                 onFocus={() => setInputOnFocus("email")}
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => setEmail(text)}
                 placeholder="Адреса електронної пошти"
                 placeholderTextColor="#bdbdbd"
               />
@@ -128,7 +113,7 @@ export default function RegistrationScreen({ navigation }) {
                 ]}
                 onFocus={() => setInputOnFocus("password")}
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => setPassword(text)}
                 placeholder="Пароль"
                 placeholderTextColor="#bdbdbd"
                 secureTextEntry={showPassword}
@@ -142,7 +127,11 @@ export default function RegistrationScreen({ navigation }) {
                 </Text>
               </Pressable>
             </View>
-            <Pressable style={styles.button} onPress={handleSubmit} onSubmit>
+            <Pressable
+              style={styles.button}
+              onPress={() => handleSubmit()}
+              onSubmit
+            >
               <Text style={styles.buttonTitle}>Зареєстуватися</Text>
             </Pressable>
             <Text
@@ -175,6 +164,9 @@ const styles = StyleSheet.create({
   },
   imgContainer: {
     position: "absolute",
+    backgroundColor: "#f6f6f6",
+    width: 120,
+    height: 120,
     top: -60,
     left: 150,
     borderRadius: 16,

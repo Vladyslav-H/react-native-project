@@ -1,5 +1,5 @@
 import { useRoute } from "@react-navigation/native";
-import { Text, View, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import MapView from "react-native-maps";
 import { Marker } from "react-native-svg";
 
@@ -8,6 +8,8 @@ export default function MapScreen() {
     params: { coordinate, locationName },
   } = useRoute();
   const { latitude, longitude } = coordinate;
+
+  console.log("MAP_SCREEN", "latitude", latitude, "longitude", longitude);
 
   return (
     <View style={styles.contaner}>
@@ -23,16 +25,11 @@ export default function MapScreen() {
         loadingIndicatorColor="#666666"
         loadingBackgroundColor="#eeeeee"
         moveOnMarkerPress={false}
-        // showsUserLocation={true}
         showsCompass={true}
         showsPointsOfInterest={false}
         provider="google"
       >
-        <Marker
-        
-          title={locationName}
-          coordinate={{ latitude, longitude }}
-        />
+        <Marker title={locationName} coordinate={{ latitude, longitude }} />
       </MapView>
     </View>
   );

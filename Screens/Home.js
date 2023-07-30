@@ -1,20 +1,22 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
+import { useDispatch } from "react-redux";
 
 import PostsScreen from "./PostsScreen";
 import CreatePostsScreen from "./CreatePostsScreen";
 import ProfileScreen from "./ProfileScreen";
 import CommentsScreen from "./CommentsScreen";
 import MapScreen from "./MapScreen";
-import NewIcon from "../assets/icons/new-icon.svg";
-import LogOutIcon from "../assets/icons/log-out-icon.svg";
+import { logoutUser } from "../redux/auth/authOperations";
+
 import { useRoute } from "@react-navigation/native";
 
 const Tabs = createBottomTabNavigator();
 
 export default function Home({ navigation }) {
   const { params } = useRoute();
+  const dispatch =useDispatch()
 
   return (
     <Tabs.Navigator
@@ -51,7 +53,7 @@ export default function Home({ navigation }) {
           headerRight: () => (
             <Pressable
               style={{ marginRight: 16 }}
-              onPress={() => navigation.goBack()}
+              onPress={() => dispatch(logoutUser())}
             >
               <Feather name="log-out" size={24} color="#bdbdbd" />
             </Pressable>
@@ -64,16 +66,29 @@ export default function Home({ navigation }) {
         component={CreatePostsScreen}
         options={{
           tabBarStyle: { display: "none" },
-
+        
           headerLeft: () => (
             <Pressable
               style={{ marginLeft: 16 }}
-              onPress={() => navigation.navigate("Публікації")}
+               onPress={() => navigation.navigate("Публікації")}
             >
               <Feather name="arrow-left" size={24} color="#212121" />
             </Pressable>
           ),
-          tabBarIcon: ({}) => <NewIcon />,
+          tabBarIcon: ({}) => (
+            <View
+              style={{
+                width: 70,
+                height: 40,
+                backgroundColor: "#ff6c00",
+                borderRadius: 20,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Feather name="plus" size={20} color="#ffffff" />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
@@ -94,6 +109,10 @@ export default function Home({ navigation }) {
           tabBarItemStyle: {
             display: "none",
           },
+            headerStyle: {
+           
+          },
+
           headerLeft: () => (
             <Pressable
               style={{ marginLeft: 16 }}

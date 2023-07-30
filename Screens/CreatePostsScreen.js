@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 import {
   View,
   Text,
@@ -16,17 +17,22 @@ import * as Location from "expo-location";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 
+import { createPost } from "../redux/post/postOperations";
+import { selectUserId } from "../redux/auth/authSelectors";
+
 export default function CreatePostsScreen() {
   const [hasPermission, setHasPermission] = useState(null);
   const [cameraRef, setCameraRef] = useState(null);
   const [takenPhoto, setTakenPhoto] = useState(null);
-  const [namePost, setNamePost] = useState(null);
+  const [postName, setpostName] = useState(null);
   const [locationName, setLocationName] = useState(null);
   const [coordinate, setCoordinate] = useState(null);
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [imageURL, setimageURL] = useState(null);
   const [inputOnFocus, setInputOnFocus] = useState(false);
 
+  const userId = useSelector(selectUserId);
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     (async () => {
@@ -67,40 +73,38 @@ export default function CreatePostsScreen() {
     setCoordinate(coords);
 
     if (!result.canceled) {
-      setSelectedPhoto(result.assets[0].uri);
+      setimageURL(result.assets[0].uri);
     } else {
       alert("You did not select any image.");
     }
   };
 
-  const createPost = async () => {
-    let location = await Location.getCurrentPositionAsync({});
-    const coords = {
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
+  const handleCreatePost = async () => {
+    const postData = {
+      imageURL,
+      postName,
+      locationName,
+      coordinate,
+      userId,
+      comments: [],
     };
-    setCoordinate(coords);
+
+    if (coordinate) dispatch(createPost(postData));
+
     setLocationName(null);
-    setSelectedPhoto(null);
-    setNamePost(null);
-    if (coordinate)
-      navigation.navigate("Публікації", {
-        selectedPhoto,
-        namePost,
-        locationName,
-        coordinate,
-      });
-    // console.log("COOR", coordinate);
-    // console.log("COORlocation", location);
+    setimageURL(null);
+    setpostName(null);
+
+    navigation.navigate("Публікації");
   };
 
   const removePost = () => {
     setLocationName(null);
-    setSelectedPhoto(null);
-    setNamePost(null);
+    setimageURL(null);
+    setpostName(null);
   };
 
-  const isActiveButton = selectedPhoto && namePost && locationName;
+  const isActiveButton = imageURL && postName && locationName;
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -110,10 +114,10 @@ export default function CreatePostsScreen() {
           keyboardVerticalOffset={Platform.OS === "ios" ? 150 : 70}
         >
           <View style={styles.cameraContaner}>
-            {selectedPhoto ? (
+            {imageURL ? (
               <Image
                 source={{
-                  uri: selectedPhoto,
+                  uri: imageURL,
                 }}
                 style={{ width: "100%", height: 240 }}
               />
@@ -136,7 +140,7 @@ export default function CreatePostsScreen() {
             </Pressable>
           </View>
           <Pressable onPress={handleSelectImage}>
-            {selectedPhoto ? (
+            {imageURL ? (
               <Text style={styles.cameraText}>Редагувати фото</Text>
             ) : (
               <Text style={styles.cameraText}>Завантажте фото</Text>
@@ -146,13 +150,13 @@ export default function CreatePostsScreen() {
           <View style={styles.inputContaner}>
             <TextInput
               style={[
-                inputOnFocus === "namePost"
+                inputOnFocus === "postName"
                   ? { ...styles.inputFocus, marginBottom: 16 }
                   : { ...styles.input, marginBottom: 16 },
               ]}
-              onFocus={() => setInputOnFocus("namePost")}
-              value={namePost}
-              onChangeText={setNamePost}
+              onFocus={() => setInputOnFocus("postName")}
+              value={postName}
+              onChangeText={setpostName}
               placeholder="Назва..."
               placeholderTextColor="#bdbdbd"
             />
@@ -182,7 +186,7 @@ export default function CreatePostsScreen() {
             isActiveButton ? styles.buttonActive : styles.buttonDisable,
           ]}
           onPress={() => {
-            createPost();
+            handleCreatePost();
           }}
           disabled={!isActiveButton}
         >

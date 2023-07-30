@@ -1,7 +1,6 @@
 import { View, StyleSheet, Image, Text, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { useRoute } from "@react-navigation/native";
 
 export default function PublicationItem({
   image,
@@ -9,11 +8,10 @@ export default function PublicationItem({
   comments = 0,
   likes = 0,
   location,
+  coordinate,
+  postId,
 }) {
   const navigation = useNavigation();
-  const {
-    params: { coordinate },
-  } = useRoute();
 
   return (
     <View style={styles.container}>
@@ -24,22 +22,23 @@ export default function PublicationItem({
           <View style={styles.commentContaner}>
             <Pressable
               onPress={() => {
-                navigation.navigate("Коментарі", { imageUrl: image });
+                navigation.navigate("Коментарі", { imageUrl: image, postId });
               }}
             >
               <Feather
                 name="message-circle"
                 size={24}
-                color={comments ? "#ff6c00" : "#bdbdbd"}
-                // stroke="#ff6c00"
+                color={comments.length ? "#ff6c00" : "#bdbdbd"}
               />
             </Pressable>
             <Text
               style={
-                comments ? styles.text : { ...styles.text, color: "#bdbdbd" }
+                comments.length
+                  ? styles.text
+                  : { ...styles.text, color: "#bdbdbd" }
               }
             >
-              {comments}
+              {comments.length}
             </Text>
           </View>
           {likes ? (

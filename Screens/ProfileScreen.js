@@ -1,81 +1,92 @@
+import { useSelector, useDispatch } from "react-redux";
 import {
   View,
   Text,
+  FlatList,
   StyleSheet,
   ImageBackground,
-  Image,
   Pressable,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { FlatList } from "react-native-gesture-handler";
 
 import BgImage from "../assets/bg-img.jpg";
+import {
+  selectUserEmail,
+  selectUserPhoto,
+  selectUserName,
+  selectUserId,
+} from "../redux/auth/authSelectors";
 
-import RemoveIcon from "../assets/icons/remove-icon.svg";
-import PublicationItem from "../components/ImageViewer/PublicationItem";
+import { logoutUser } from "../redux/auth/authOperations";
 
-// const PublicationList = [
-//   {
-//     id: 1,
-//     source: require("../assets/images/public/forest.jpg"),
-//     description: "Ліс",
-//     comments: 8,
-//     likes: 153,
-//     location: "Ukraine",
-//   },
-//   {
-//     id: 2,
-//     source: require("../assets/images/public/sunset.jpg"),
-//     description: "Захід на Чорному морі",
-//     comments: 3,
-//     likes: 200,
-//     location: "Ukraine",
-//   },
-//   {
-//     id: 3,
-//     source: require("../assets/images/public/lodge.jpg"),
-//     description: "Старий будиночок у Венеції",
-//     comments: 50,
-//     likes: 200,
-//     location: "Italy",
-//   },
-// ];
+import { ImageViewer } from "../components/ImageViewer/ImageViewer";
+import PublicationItem from "../components/PublicationItem/PublicationItem";
+import { selectPostList } from "../redux/post/postSelectors";
+import { useEffect } from "react";
 
-export default function ProfileScreen({ navigation }) {
-  // const renderItem = ({ item }) => (
-  //   <PublicationItem
-  //     image={item.source}
-  //     description={item.description}
-  //     comments={item.comments}
-  //     likes={item.likes}
-  //     location={item.location}
-  //   />
-  // );
+export default function ProfileScreen() {
+  const userId = useSelector(selectUserId);
+  const userPhotoUrl = useSelector(selectUserPhoto);
+  const userEmail = useSelector(selectUserEmail);
+  const userName = useSelector(selectUserName);
+  const postList = useSelector(selectPostList);
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const postListCurrentUser = postList.filter((el) => el.userId === userId);
+  });
+
+  const renderItem = ({ item }) => (
+    <PublicationItem
+      showsVerticalScrollIndicator={false}
+      image={item.imageURL}
+      description={item.postName}
+      location={item.locationName}
+      coordinate={item.coordinate}
+      postId={item.postId}
+      comments={item.comments}
+    />
+  );
+
   return (
     <ImageBackground
       source={BgImage}
       style={{ position: "absolute", top: 0, width: "100%", height: "100%" }}
     >
       <View style={styles.container}>
-        <View style={styles.box}>
-          <View style={styles.imgContainer}>
-            <Image style={{ borderRadius: 16 }} source={UserImage} />
-            <Pressable style={styles.closeBtn}>
-              <RemoveIcon width={35} height={35} />
-            </Pressable>
-          </View>
+        <View
+          style={[
+            postListCurrentUser.length
+              ? { ...styles.box, height: "75%" }
+              : { ...styles.box, height: "40%" },
+          ]}
+        >
+          <ImageViewer userPhoto={userPhotoUrl} />
           <Pressable
             style={styles.buttonLogOut}
-            onPress={() => navigation.navigate("Login")}
+            onPress={() => dispatch(logoutUser())}
           >
             <Feather name="log-out" size={24} color="#bdbdbd" />
           </Pressable>
-          <Text style={styles.nameText}>Name SurName</Text>
-          {/* <FlatList
-            data={PublicationList}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-          /> */}
+          <Text style={styles.nameText}>{userName}</Text>
+          {postListCurrentUser.length ? (
+            <FlatList
+              data={postListCurrentUser}
+              showsVerticalScrollIndicator={false}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.postId}
+            />
+          ) : (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 30 }}>У Вас ще немає публікацій</Text>
+            </View>
+          )}
         </View>
       </View>
     </ImageBackground>
@@ -88,16 +99,11 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   box: {
-     
-    position: "relative",
-    alignItems: "center",
     paddingHorizontal: 16,
     paddingTop: 92,
-    paddingBottom: 78,
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     backgroundColor: "#ffffff",
-  
   },
   imgContainer: {
     position: "absolute",
@@ -117,7 +123,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   nameText: {
-    marginBottom:33,
+    marginBottom: 33,
     textAlign: "center",
     fontSize: 30,
     fontFamily: "Roboto-Medium",
