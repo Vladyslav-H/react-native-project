@@ -76,7 +76,7 @@ export const writePostToFirestoreAPI = async (postData) => {
     await setDoc(doc(db, "posts", postId), {
       ...postData,
     });
-    alert("The post was created successfully");
+    alert("Публікація успішно створена");
     return { ...postData, postId };
   } catch (err) {
     console.error("Error adding document: ", err);
